@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lost & Back – Connexion</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    .header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+    .main-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    .block {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+      width: 300px;
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    a.button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #10b981;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      sendEmailVerification,
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      OAuthProvider,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxFy9-vbiYgEz166bs00iG4abtYLHPIV0",
+      authDomain: "lostandback-fee16.firebaseapp.com",
+      projectId: "lostandback-fee16",
+      storageBucket: "lostandback-fee16.firebasestorage.app",
+      messagingSenderId: "1028605936220",
+      appId: "1:1028605936220:web:deebf532af5c57ef689c99",
+      measurementId: "G-1XL6YCB77H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    const appleProvider = new OAuthProvider('apple.com');
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && localStorage.getItem("userInfo")) {
+        window.location.href = "dashboard.html";
+      } else if (user) {
+        window.location.href = "register.html";
+      }
+    });
+
+    window.handleSignup = async function () {
+      const email = document.getElementById("signup-email").value;
+      const password = document.getElementById("signup-password").value;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        alert("Inscription réussie ! Vérifiez votre e-mail.");
+        window.location.href = "register.html";
+      } catch (error) {
+        alert("Erreur : " + error.message);
+      }
+    };
+
+    window.handleLogin = async function () {
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        alert("Erreur : " + error.message);
+      }
+    };
+
+    window.googleLogin = async function () {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const profile = result._tokenResponse;
+        const userInfo = {
+          email: profile.email || "",
+          firstName: profile.firstName || "",
+          lastName: profile.lastName || ""
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        window.location.href = "register.html";
+      } catch (error) {
+        alert("Erreur Google : " + error.message);
+      }
+    };
+
+    window.appleLogin = async function () {
+      try {
+        const result = await signInWithPopup(auth, appleProvider);
+        const profile = result._tokenResponse;
+        const userInfo = {
+          email: profile.email || "",
+          firstName: profile.firstName || "",
+          lastName: profile.lastName || ""
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        window.location.href = "register.html";
+      } catch (error) {
+        alert("Erreur Apple : " + error.message);
+      }
+    };
+  </script>
+</head>
+<body>
+  <h1>Bienvenue sur Lost & Back</h1>
+  <div class="main-container">
+    <div class="block">
+      <h2>Créer un compte</h2>
+      <input id="signup-email" type="email" placeholder="Email" />
+      <input id="signup-password" type="password" placeholder="Mot de passe" />
+      <button onclick="handleSignup()">S'inscrire</button>
+      <button onclick="googleLogin()" style="background-color:#ea4335; color:white;">Google</button>
+      <button onclick="appleLogin()" style="background-color:#000; color:white;">Apple</button>
+    </div>
+    <div class="block">
+      <h2>Se connecter</h2>
+      <input id="login-email" type="email" placeholder="Email" />
+      <input id="login-password" type="password" placeholder="Mot de passe" />
+      <button onclick="handleLogin()">Connexion</button>
+      <button onclick="googleLogin()" style="background-color:#ea4335; color:white;">Google</button>
+      <button onclick="appleLogin()" style="background-color:#000; color:white;">Apple</button>
+    </div>
+  </div>
+  <a class="button" href="found.html?object=Valise%20bleue&lang=fr">Mode Trouveur</a>
+</body>
+</html>
